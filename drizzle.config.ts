@@ -1,16 +1,21 @@
 // drizzle.config.ts
 import { defineConfig } from 'drizzle-kit';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+// Cek apakah sedang di production atau tidak
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Tambahkan query parameter hanya jika di local
+const sslMode = isProduction ? '' : '?sslmode=disable';
 
 export default defineConfig({
-  schema: './src/db/schema.ts',
+  schema: './src/infra/drizzle/schema/index.ts',
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    host: process.env.DB_HOST!,
-    port: Number(process.env.DB_PORT ?? 5432),
-    user: process.env.DB_USER!,
-    password: process.env.DB_PASSWORD!,
-    database: process.env.DB_NAME!,
+    url: `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}${sslMode}`,
   },
   verbose: true,
   strict: true,
