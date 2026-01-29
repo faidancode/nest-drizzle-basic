@@ -45,4 +45,18 @@ export class CategoriesService {
 
     return await this.repo.update(id, updateData);
   }
+
+  async delete(id: string) {
+    const category = await this.repo.findById(id);
+
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+
+    await this.repo.remove(id);
+
+    return {
+      message: 'Category deleted successfully',
+    };
+  }
 }

@@ -7,6 +7,7 @@ import {
   Body,
   Patch,
   UsePipes,
+  Delete,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import {
@@ -19,31 +20,36 @@ import { ZodValidationPipe } from 'src/common/http/zod.validation.pipe';
 
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(private readonly service: CategoriesService) {}
 
   @Post()
   @UsePipes(new ZodValidationPipe(CreateCategorySchema))
   async create(@Body() body: CreateCategoryInput) {
-    return await this.categoriesService.create(body);
+    return await this.service.create(body);
   }
 
   @Patch(':id')
   @UsePipes(new ZodValidationPipe(UpdateCategorySchema))
   async update(@Param('id') id: string, @Body() body: UpdateCategoryInput) {
-    return await this.categoriesService.update(id, body);
+    return await this.service.update(id, body);
   }
 
   @Get()
   async list() {
-    return await this.categoriesService.findAll();
+    return await this.service.findAll();
   }
 
   @Get(':id')
   async detail(@Param('id') id: string) {
-    const data = await this.categoriesService.findOne(id);
+    const data = await this.service.findOne(id);
     if (!data) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
     return data;
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.service.delete(id);
   }
 }

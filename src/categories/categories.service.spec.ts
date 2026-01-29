@@ -11,6 +11,9 @@ describe('CategoriesService', () => {
   const mockCategoriesRepository = {
     findAll: jest.fn(),
     findById: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -60,6 +63,123 @@ describe('CategoriesService', () => {
       mockCategoriesRepository.findById.mockResolvedValue(null);
 
       await expect(service.findOne('999')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('create', () => {
+    it('should create category with generated slug', async () => {
+      const dto = {
+        name: 'Tech News',
+        description: 'Technology category',
+      };
+
+      const createdCategory = {
+        id: '1',
+        name: 'Tech News',
+        slug: 'tech-news',
+        description: 'Technology category',
+      };
+
+      mockCategoriesRepository.create.mockResolvedValue(createdCategory);
+
+      const result = await service.create(dto as any);
+
+      expect(repo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Tech News',
+          slug: 'tech-news',
+        }),
+      );
+
+      expect(result).toEqual(createdCategory);
+    });
+
+    it('should use slug from dto if provided', async () => {
+      const dto = {
+        name: 'Tech',
+        slug: 'Custom Slug',
+      };
+
+      const createdCategory = {
+        id: '1',
+        name: 'Tech',
+        slug: 'custom-slug',
+      };
+
+      mockCategoriesRepository.create.mockResolvedValue(createdCategory);
+
+      const result = await service.create(dto as any);
+
+      expect(repo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          slug: 'custom-slug',
+        }),
+      );
+
+      expect(result).toEqual(createdCategory);
+    });
+  });
+
+  describe('update', () => {
+    it('should update category and regenerate slug from name', async () => {
+      const existingCategory = { id: '1', name: 'Old Name' };
+
+      const dto = {
+        name: 'New Name',
+      };
+
+      const updatedCategory = {
+        id: '1',
+        name: 'New Name',
+        slug: 'new-name',
+      };
+
+      mockCategoriesRepository.findById.mockResolvedValue(existingCategory);
+      mockCategoriesRepository.update.mockResolvedValue(updatedCategory);
+
+      const result = await service.update('1', dto as any);
+
+      expect(repo.findById).toHaveBeenCalledWith('1');
+      expect(repo.update).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({
+          name: 'New Name',
+          slug: 'new-name',
+        }),
+      );
+
+      expect(result).toEqual(updatedCategory);
+    });
+
+    it('should throw NotFoundException if category not found', async () => {
+      mockCategoriesRepository.findById.mockResolvedValue(null);
+
+      await expect(
+        service.update('999', { name: 'Test' } as any),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete category if exists', async () => {
+      const existingCategory = { id: '1', name: 'Tech' };
+
+      mockCategoriesRepository.findById.mockResolvedValue(existingCategory);
+      mockCategoriesRepository.remove.mockResolvedValue(undefined);
+
+      const result = await service.delete('1');
+
+      expect(repo.findById).toHaveBeenCalledWith('1');
+      expect(repo.remove).toHaveBeenCalledWith('1');
+      expect(result).toEqual({
+        message: 'Category deleted successfully',
+      });
+    });
+
+    it('should throw NotFoundException if category not found', async () => {
+      mockCategoriesRepository.findById.mockResolvedValue(null);
+
+      await expect(service.delete('999')).rejects.toThrow(NotFoundException);
     });
   });
 });

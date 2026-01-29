@@ -56,4 +56,13 @@ export class CategoriesRepository {
       .where(eq(categories.id, id));
     return result[0];
   }
+
+  async remove(id: string): Promise<void> {
+    // soft delete
+    await this.findById(id); // ensure exists
+    await this.db
+      .update(categories)
+      .set({ deletedAt: new Date() })
+      .where(eq(categories.id, id));
+  }
 }
