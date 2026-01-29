@@ -7,13 +7,17 @@ import * as schema from './schema';
 @Module({
   providers: [
     {
-      provide: 'DRIZZLE',
+      provide: 'DRIZZLE', // Pastikan di Repository juga pakai @Inject('DRIZZLE')
       useFactory: () => {
         const isProduction = process.env.NODE_ENV === 'production';
-        const sslParam = isProduction ? '' : '?sslmode=disable';
 
         const pool = new Pool({
-          connectionString: `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}${sslParam}`,
+          host: process.env.DB_HOST,
+          port: Number(process.env.DB_PORT) || 5432,
+          user: process.env.DB_USER,
+          password: process.env.DB_PASSWORD,
+          database: process.env.DB_NAME,
+          // Jika produksi (misal Supabase/Neon), aktifkan SSL
           ssl: isProduction ? { rejectUnauthorized: false } : false,
         });
 

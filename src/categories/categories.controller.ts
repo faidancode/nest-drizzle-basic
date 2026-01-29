@@ -1,9 +1,37 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  NotFoundException,
+  Post,
+  Body,
+  Patch,
+  UsePipes,
+} from '@nestjs/common';
 import { CategoriesService } from './categories.service';
+import {
+  CreateCategorySchema,
+  UpdateCategorySchema,
+  type CreateCategoryInput,
+  type UpdateCategoryInput,
+} from './categories.schema';
+import { ZodValidationPipe } from 'src/common/http/zod.validation.pipe';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
+
+  @Post()
+  @UsePipes(new ZodValidationPipe(CreateCategorySchema))
+  async create(@Body() body: CreateCategoryInput) {
+    return await this.categoriesService.create(body);
+  }
+
+  @Patch(':id')
+  @UsePipes(new ZodValidationPipe(UpdateCategorySchema))
+  async update(@Param('id') id: string, @Body() body: UpdateCategoryInput) {
+    return await this.categoriesService.update(id, body);
+  }
 
   @Get()
   async list() {
