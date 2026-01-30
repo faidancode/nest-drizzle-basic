@@ -6,6 +6,7 @@ import { DrizzleModule } from './infra/drizzle/drizzle.module';
 import { AppConfig } from './config/app.config';
 import { ConfigModule } from '@nestjs/config';
 import { AppConfigModule } from './config/app-config.module';
+import { BrandsModule } from './brands/brands.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AppConfigModule } from './config/app-config.module';
     AppConfigModule,
     CategoriesModule,
     DrizzleModule,
+    BrandsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppConfig],

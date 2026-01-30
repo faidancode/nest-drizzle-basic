@@ -65,6 +65,19 @@ describe('CategoriesController', () => {
       expect(service.create).toHaveBeenCalledWith(dto);
       expect(result).toEqual(createdCategory);
     });
+
+    it('should throw an error if category name already exists', async () => {
+      const dto = { name: 'Tech', description: 'Duplicate' };
+
+      // Simulasi service melempar error (misal: ConflictException)
+      mockCategoriesService.create.mockRejectedValue(
+        new Error('Category already exists'),
+      );
+
+      await expect(controller.create(dto as any)).rejects.toThrow(
+        'Category already exists',
+      );
+    });
   });
 
   describe('update', () => {
@@ -86,6 +99,18 @@ describe('CategoriesController', () => {
       expect(service.update).toHaveBeenCalledWith('1', dto);
       expect(result).toEqual(updatedCategory);
     });
+
+    it('should throw an error if category to update is not found', async () => {
+      const dto = { name: 'Non-existent' };
+
+      mockCategoriesService.update.mockRejectedValue(
+        new Error('Category not found'),
+      );
+
+      await expect(controller.update('999', dto as any)).rejects.toThrow(
+        'Category not found',
+      );
+    });
   });
 
   describe('delete', () => {
@@ -100,6 +125,26 @@ describe('CategoriesController', () => {
       expect(result).toEqual({
         message: 'Category deleted successfully',
       });
+    });
+
+    it('should throw an error if category to delete is not found', async () => {
+      mockCategoriesService.delete.mockRejectedValue(
+        new Error('Category not found'),
+      );
+
+      await expect(controller.delete('999')).rejects.toThrow(
+        'Category not found',
+      );
+    });
+
+    it('should throw an error if category is being used by products', async () => {
+      mockCategoriesService.delete.mockRejectedValue(
+        new Error('Cannot delete category with active products'),
+      );
+
+      await expect(controller.delete('1')).rejects.toThrow(
+        'Cannot delete category with active products',
+      );
     });
   });
 });
