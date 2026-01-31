@@ -5,7 +5,7 @@ export const CreateCategorySchema = z.object({
   slug: z.string().min(3).max(160).optional(),
   icon: z.string().max(80).optional(),
   description: z.string().max(255).optional(),
-  active: z.boolean().optional().default(true),
+  isActive: z.boolean().optional().default(true),
 });
 
 export type CreateCategoryInput = z.infer<typeof CreateCategorySchema>;
